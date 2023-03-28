@@ -20,6 +20,8 @@ void main() {
       routes: {
         '/login/': (context) => const LoginView(),
         '/register/': (context) => const RegisterView(),
+        '/main/': (context) => const HomePage(),
+        '/verify/': (context) => const VerifyEmailView(),
       },
     ),
   );
@@ -38,12 +40,8 @@ class HomePage extends StatelessWidget {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
               final user = FirebaseAuth.instance.currentUser;
-              if (user != null) {
-                if (user.emailVerified) {
-                  return const NotesView();
-                } else {
-                  return const VerifyEmailView();
-                }
+              if (user != null && user.emailVerified) {
+                return const NotesView();
               } else {
                 return const LoginView();
               }
@@ -74,20 +72,22 @@ class NotesView extends StatefulWidget {
 
 class _NotesViewState extends State<NotesView> {
   @override
+  late final String userEmail;
   Widget build(BuildContext context) {
+    userEmail = FirebaseAuth.instance.currentUser?.email ?? "Unknown";
     return Scaffold(
       appBar: AppBar(
         title: const Text('Main UI'),
         actions: [
           PopupMenuButton<MenuAction>(
             onSelected: (value) async {
+              final navigator = Navigator.of(context);
               switch (value) {
                 case MenuAction.logout:
                   final shouldLogout = await showLogOutDialog(context);
                   if (shouldLogout) {
                     await FirebaseAuth.instance.signOut();
-                    Navigator.of(context)
-                        .pushNamedAndRemoveUntil('/login/', (_) => false);
+                    navigator.pushNamedAndRemoveUntil('/login/', (_) => false);
                   }
                   break;
               }
@@ -101,7 +101,12 @@ class _NotesViewState extends State<NotesView> {
           ),
         ],
       ),
-      body: const Text('Hello Notes'),
+      body: Center(
+        child: Text(
+          'Hello $userEmail',
+          style: const TextStyle(fontSize: 22),
+        ),
+      ),
     );
   }
 }
