@@ -1,5 +1,4 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -13,11 +12,12 @@ class RegisterView extends StatefulWidget {
 class _RegisterViewState extends State<RegisterView> {
   late final TextEditingController _email;
   late final TextEditingController _password;
-
+  late final TextEditingController _userName;
   @override
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
+    _userName = TextEditingController();
     super.initState();
   }
 
@@ -25,6 +25,7 @@ class _RegisterViewState extends State<RegisterView> {
   void dispose() {
     _email.dispose();
     _password.dispose();
+    _userName.dispose();
     super.dispose();
   }
 
@@ -34,6 +35,14 @@ class _RegisterViewState extends State<RegisterView> {
       appBar: AppBar(title: const Text('Register')),
       body: Column(
         children: [
+          TextField(
+            controller: _userName,
+            enableSuggestions: false,
+            autocorrect: false,
+            decoration: const InputDecoration(
+              hintText: 'Enter your username',
+            ),
+          ),
           TextField(
             controller: _email,
             enableSuggestions: false,
@@ -64,6 +73,8 @@ class _RegisterViewState extends State<RegisterView> {
                 );
                 await FirebaseAuth.instance.signInWithEmailAndPassword(
                     email: email, password: password);
+                final user = FirebaseAuth.instance.currentUser;
+                user?.updateDisplayName(_userName.text);
                 navigator.pushNamedAndRemoveUntil('/verify/', (route) => false);
               } on FirebaseAuthException catch (e) {
                 if (e.code == 'weak-password') {

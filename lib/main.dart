@@ -74,7 +74,7 @@ class _NotesViewState extends State<NotesView> {
   @override
   late final String userEmail;
   Widget build(BuildContext context) {
-    userEmail = FirebaseAuth.instance.currentUser?.email ?? "Unknown";
+    userEmail = FirebaseAuth.instance.currentUser?.displayName ?? "Unknown";
     return Scaffold(
       appBar: AppBar(
         title: const Text('Main UI'),
